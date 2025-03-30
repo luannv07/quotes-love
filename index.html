@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quotes | Luan Nguyen</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .quote-box {
+            margin-bottom: 30px;
+        }
+
+        .quote {
+            font-size: 20px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: left;
+            position: relative;
+            padding: 0 10px;
+        }
+
+        .quote:before {
+            content: '"';
+            font-size: 50px;
+            color: #e0e0e0;
+            position: absolute;
+            left: -20px;
+            top: -10px;
+        }
+
+        .english {
+            color: #1a73e8;
+            margin-bottom: 10px;
+        }
+
+        .vietnamese {
+            color: #333;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        button {
+            padding: 12px 24px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #0d62d1;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .copy-button {
+            background-color: #34a853;
+        }
+
+        .copy-button:hover {
+            background-color: #2d9249;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1a73e8;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 style="margin-bottom: 20px; color: #1a73e8;">Quotes</h1>
+
+        <div class="quote-box">
+            <p class="quote english" id="english-quote">Loading...</p>
+            <p class="quote vietnamese" id="vietnamese-quote">Đang tải...</p>
+        </div>
+
+        <div class="loader" id="loader"></div>
+
+        <div class="buttons">
+            <button class="copy-button" id="copy-button">Sao chép</button>
+            <button id="next-button">Trích dẫn mới</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Đã sao chép trích dẫn!</div>
+
+    <script>
+        // Khai báo biến
+        let quotes = [];
+        let currentQuoteIndex = 0;
+
+        // Các phần tử DOM
+        const englishQuote = document.getElementById('english-quote');
+        const vietnameseQuote = document.getElementById('vietnamese-quote');
+        const copyButton = document.getElementById('copy-button');
+        const nextButton = document.getElementById('next-button');
+        const toast = document.getElementById('toast');
+        const loader = document.getElementById('loader');
+
+        // Hàm lấy dữ liệu từ file JSON
+        async function fetchQuotes() {
+            try {
+                loader.style.display = 'block';
+
+                const response = await fetch('quotes.json');
+                if (!response.ok) {
+                    throw new Error('Không thể tải file quotes.json');
+                }
+
+                quotes = await response.json();
+
+                // Hiển thị trích dẫn đầu tiên sau khi tải xong
+                if (quotes.length > 0) {
+                    displayQuote(0);
+                } else {
+                    englishQuote.textContent = 'Không có trích dẫn nào.';
+                    vietnameseQuote.textContent = 'Không có trích dẫn nào.';
+                }
+            } catch (error) {
+                console.error('Lỗi:', error);
+                englishQuote.textContent = 'Lỗi tải dữ liệu.';
+                vietnameseQuote.textContent = 'Vui lòng kiểm tra file quotes.json.';
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        // Hàm hiển thị trích dẫn theo chỉ mục
+        function displayQuote(index) {
+            if (quotes.length === 0) return;
+
+            const quote = quotes[index];
+            englishQuote.textContent = quote.english;
+            vietnameseQuote.textContent = quote.vietnamese;
+        }
+
+        // Hàm chuyển sang trích dẫn mới
+        function showNextQuote() {
+            if (quotes.length === 0) return;
+
+            loader.style.display = 'block';
+
+            // Thêm hiệu ứng fade out/in
+            document.querySelector('.quote-box').style.opacity = '0.2';
+
+            setTimeout(() => {
+                currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
+                displayQuote(currentQuoteIndex);
+                document.querySelector('.quote-box').style.opacity = '1';
+                loader.style.display = 'none';
+            }, 300);
+        }
+
+        // Hàm sao chép trích dẫn
+        function copyQuote() {
+            if (quotes.length === 0) return;
+
+            const quote = quotes[currentQuoteIndex];
+            const textToCopy = `${quote.english}\n${quote.vietnamese}`;
+
+            navigator.clipboard.writeText(textToCopy)
+                .then(() => {
+                    // Hiển thị thông báo đã sao chép
+                    toast.classList.add('show');
+                    setTimeout(() => {
+                        toast.classList.remove('show');
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Lỗi khi sao chép:', err);
+                    alert('Không thể sao chép trích dẫn. Vui lòng thử lại.');
+                });
+        }
+
+        // Khởi tạo ứng dụng
+        function init() {
+            // Tải trích dẫn từ file JSON
+            fetchQuotes();
+
+            // Thêm sự kiện cho các nút
+            nextButton.addEventListener('click', showNextQuote);
+            copyButton.addEventListener('click', copyQuote);
+
+            // Thêm hiệu ứng chuyển đổi cho quote-box
+            document.querySelector('.quote-box').style.transition = 'opacity 0.3s ease';
+        }
+
+        // Khởi động ứng dụng khi trang đã tải xong
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>
