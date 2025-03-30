@@ -68,6 +68,7 @@
             display: flex;
             justify-content: center;
             gap: 15px;
+            flex-wrap: wrap; /* Cho phép các nút xuống dòng trên màn hình nhỏ */
         }
 
         button {
@@ -79,6 +80,7 @@
             cursor: pointer;
             font-size: 16px;
             transition: background-color 0.3s, transform 0.2s;
+            margin-bottom: 10px; /* Thêm margin bottom cho nút khi xuống dòng */
         }
 
         button:hover {
@@ -134,6 +136,59 @@
 
             100% {
                 transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive styles */
+        @media screen and (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+
+            .quote {
+                font-size: 18px;
+                padding: 0 5px;
+            }
+
+            .quote:before {
+                font-size: 40px;
+                left: -15px;
+            }
+
+            button {
+                width: 100%; /* Các nút chiếm toàn bộ chiều rộng trên màn hình nhỏ */
+                padding: 10px 20px;
+                font-size: 16px;
+            }
+
+            .buttons {
+                gap: 10px;
+            }
+        }
+
+        /* Ultra small devices */
+        @media screen and (max-width: 320px) {
+            .container {
+                padding: 10px;
+            }
+
+            .quote {
+                font-size: 16px;
+            }
+
+            button {
+                padding: 8px 16px;
+                font-size: 14px;
             }
         }
     </style>
