@@ -217,6 +217,7 @@
         // Khai báo biến
         let quotes = [];
         let currentQuoteIndex = 0;
+        let usedQuotes = new Set(); // Theo dõi những trích dẫn đã hiển thị
 
         // Các phần tử DOM
         const englishQuote = document.getElementById('english-quote');
@@ -238,9 +239,9 @@
 
                 quotes = await response.json();
 
-                // Hiển thị trích dẫn đầu tiên sau khi tải xong
+                // Hiển thị trích dẫn ngẫu nhiên đầu tiên sau khi tải xong
                 if (quotes.length > 0) {
-                    displayQuote(0);
+                    displayRandomQuote();
                 } else {
                     englishQuote.textContent = 'Không có trích dẫn nào.';
                     vietnameseQuote.textContent = 'Không có trích dẫn nào.';
@@ -254,6 +255,22 @@
             }
         }
 
+        // Hàm lấy index ngẫu nhiên cho trích dẫn
+        function getRandomQuoteIndex() {
+            // Nếu đã hiển thị tất cả trích dẫn, reset lại danh sách
+            if (usedQuotes.size >= quotes.length) {
+                usedQuotes.clear();
+            }
+            
+            let randomIndex;
+            do {
+                randomIndex = Math.floor(Math.random() * quotes.length);
+            } while (usedQuotes.has(randomIndex));
+            
+            usedQuotes.add(randomIndex);
+            return randomIndex;
+        }
+
         // Hàm hiển thị trích dẫn theo chỉ mục
         function displayQuote(index) {
             if (quotes.length === 0) return;
@@ -261,9 +278,18 @@
             const quote = quotes[index];
             englishQuote.textContent = quote.english;
             vietnameseQuote.textContent = quote.vietnamese;
+            currentQuoteIndex = index;
         }
 
-        // Hàm chuyển sang trích dẫn mới
+        // Hàm hiển thị trích dẫn ngẫu nhiên
+        function displayRandomQuote() {
+            if (quotes.length === 0) return;
+            
+            const randomIndex = getRandomQuoteIndex();
+            displayQuote(randomIndex);
+        }
+
+        // Hàm chuyển sang trích dẫn mới (ngẫu nhiên)
         function showNextQuote() {
             if (quotes.length === 0) return;
 
@@ -273,8 +299,7 @@
             document.querySelector('.quote-box').style.opacity = '0.2';
 
             setTimeout(() => {
-                currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
-                displayQuote(currentQuoteIndex);
+                displayRandomQuote();
                 document.querySelector('.quote-box').style.opacity = '1';
                 loader.style.display = 'none';
             }, 300);
